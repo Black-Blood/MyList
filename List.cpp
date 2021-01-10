@@ -6,7 +6,7 @@ struct ListElement
 	ListElement<T>* previousElement = nullptr;
 };
 
-// Двусторонній список
+// My List
 template<typename T>
 class List
 {
@@ -16,10 +16,10 @@ public:
 	{
 		this->initList();
 
-		this->fillList(moreData...);
+		this->pushBack(moreData...);
 	}
 
-	// Видалити елемент з кучі
+	// Removing elements
 	void pop(int position)
 	{
 		ListElement<T>* currentElement = this->findElement(position);
@@ -33,25 +33,34 @@ public:
 	}
 	void pop(int positionStart, int positionEnd)
 	{
-		for (int i = positionStart; i <= positionEnd; i++)
+		for (int i = positionStart; i <= positionEnd; positionEnd--)
 		{
-			ListElement<T>* currentElement = this->findElement(i);
-
-			currentElement->nextElement->previousElement = currentElement->previousElement;
-			currentElement->previousElement->nextElement = currentElement->nextElement;
-
-			delete currentElement;
-
-			this->listSize--;
+			this->pop(i);
 		}
 	}
-	void popFront()
+	void popFront(int countOfElements = 1)
 	{
-		this->pop(0);
+		if (countOfElements == 1)
+		{
+			this->pop(0);
+
+		}
+		else if (countOfElements > 1)
+		{
+			this->pop(0, countOfElements - 1);
+		}
 	}
-	void popBack()
+	void popBack(int countOfElements = 1)
 	{
-		this->pop(this->listSize - 1);
+		if (countOfElements == 1)
+		{
+			this->pop(this->listSize - 1);
+
+		}
+		else if (countOfElements > 1)
+		{
+			this->pop(this->listSize - countOfElements, this->listSize - 1);
+		}
 	}
 
 	void clear()
@@ -59,15 +68,7 @@ public:
 		this->pop(0, this->listSize - 1);
 	}
 
-	// Добавити елемент в кучу
-	void pushBack(T newData)
-	{
-		this->insertElement(newData, this->lastElement->previousElement, this->lastElement);
-	}
-	void pushFront(T newData)
-	{
-		this->insertElement(newData, this->firstElement, this->firstElement->nextElement);
-	}
+	// Adding elements
 	void push(int position, T newData)
 	{
 		if (this->listSize == 0)
@@ -82,12 +83,41 @@ public:
 		}
 	}
 
+	void pushBack() { }
+
+	template<typename N>
+	void pushBack(N newData)
+	{
+		this->insertElement(newData, this->lastElement->previousElement, this->lastElement);
+	}
+
+	template<typename N, typename... Ns>
+	void pushBack(N newData, Ns... moreData)
+	{
+		this->insertElement(newData, this->lastElement->previousElement, this->lastElement);
+		this->pushBack(moreData...);
+	}
+
+	void pushFront() { }
+
+	template<typename N>
+	void pushFront(N newData)
+	{
+		this->insertElement(newData, this->firstElement, this->firstElement->nextElement);
+	}
+
+	template<typename N, typename... Ns>
+	void pushFront(N newData, Ns... moreData)
+	{
+		this->insertElement(newData, this->firstElement, this->firstElement->nextElement);
+		this->pushFront(moreData...);
+	}
+
 	int size()
 	{
 		return this->listSize;
 	}
 
-	// Перегрузка операторів
 	T& operator[] (const int position)
 	{
 		return this->findElement(position)->data;
@@ -99,7 +129,7 @@ protected:
 
 	int listSize = 0;
 
-	// Шукає елемент в кучі найоптимальнішим шляхом
+	// searching an element in the best way
 	ListElement<T>* findElement(int position)
 	{
 		ListElement<T>* foundElement;
@@ -129,14 +159,13 @@ protected:
 		return foundElement;
 	}
 
-	// Встановлює базові залежності
 	void initList()
 	{
 		this->firstElement->nextElement = this->lastElement;
 		this->lastElement->previousElement = this->firstElement;
 	}
 
-	// Перевірка чи позиція елементу не виходить за рамки діапазону [0; ...; (listSize - 1) ]
+		// protecting user from going beyond of the list [0; ...; (listSize - 1) ]
 	int preparePosition(int position)
 	{
 		while (position < 0)
@@ -152,7 +181,7 @@ protected:
 		return position;
 	}
 	
-	// Свторює елемент в кучі і підключає взаємодію
+	// add element in the list between selected elements
 	void insertElement(T newData, ListElement<T>* previousElement, ListElement<T>* nextElement)
 	{
 		ListElement<T>* newElement = new ListElement<T>;
@@ -166,21 +195,5 @@ protected:
 		nextElement->previousElement = newElement;
 
 		this->listSize++;
-	}
-
-	// Заповнює масив
-	void fillList(){ }
-
-	template<typename N>
-	void fillList(N newData)
-	{
-		this->pushBack(newData);
-	}
-
-	template<typename N, typename... Ns>
-	void fillList(N newData, Ns... moreData)
-	{
-		this->pushBack(newData);
-		this->fillList(moreData...);
 	}
 };
