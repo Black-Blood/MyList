@@ -22,14 +22,17 @@ public:
 	// Removing elements
 	void pop(int position)
 	{
-		ListElement<T>* currentElement = this->findElement(position);
+		if (this->listSize != 0)
+		{
+			ListElement<T>* currentElement = this->findElement(position);
 
-		currentElement->nextElement->previousElement = currentElement->previousElement;
-		currentElement->previousElement->nextElement = currentElement->nextElement;
+			currentElement->nextElement->previousElement = currentElement->previousElement;
+			currentElement->previousElement->nextElement = currentElement->nextElement;
 
-		delete currentElement;
+			delete currentElement;
 
-		this->listSize--;
+			this->listSize--;
+		}
 	}
 	void pop(int positionStart, int positionEnd)
 	{
